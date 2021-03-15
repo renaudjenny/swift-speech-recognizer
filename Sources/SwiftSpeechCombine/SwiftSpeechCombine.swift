@@ -2,16 +2,33 @@ import Combine
 import Speech
 
 public protocol SpeechRecognitionEngine {
+    /// Publish every change about the authorization status of the Speech Recognition including microphone usage
     var authorizationStatusPublisher: AnyPublisher<SFSpeechRecognizerAuthorizationStatus?, Never> { get }
+
+    /// Publish every single time the Speech Recognition engine recognize something. Including duplicates or `nil`.
+    /// If you want a shortcut that already do the filter for you, use `newUtterancePublisher`
     var recognizedUtterancePublisher: AnyPublisher<String?, Never> { get }
+
+    /// Publish every changes about the Recognition status. Useful when you want to notify the user of
+    /// the current Speech Recognition State
     var recognitionStatusPublisher: AnyPublisher<SpeechRecognitionStatus, Never> { get }
+
+    /// Publish whenever the availability of Speech Recognition services changes, this value will change
+    /// for instance if the internet connection is lost
     var isRecognitionAvailablePublisher: AnyPublisher<Bool, Never> { get }
 
     /// Shortcut to access with ease to the published new utterance (already filtered)
     var newUtterancePublisher: AnyPublisher<String, Never> { get }
 
+    /// Ask user if you can use Microphone for Speech Recognition
+    /// You'll need to subscribe to `authorizationStatusPublisher` to know the user choice
     func requestAuthorization()
+
+    /// Will trigger the Speech Recognition process. This method hide all the complexity of AVAudio interactions
+    /// subscribe to `recognizedUtterancePublisher` or `newUtterancePublisher` depending on your needs
     func startRecording() throws
+
+    /// Stop the Speech Recognition process manually
     func stopRecording()
 }
 
@@ -162,4 +179,3 @@ public enum SpeechRecognitionEngineError: Error {
     case speechAudioBufferRecognitionRequestInitFailed
     case speechRecognizerInitFailed
 }
-
