@@ -1,8 +1,20 @@
-# SwiftSpeechCombine
+# SwiftSpeechRecognizer
 
-A very straightforward Combine wrapper around Speech Recognition part of SFSpeechRecognizer to allow you using this with ease.
+This package contains some very straightforward wrappers around around Speech Recognition part of SFSpeechRecognizer to allow you using this with ease.
 
-## Usage
+* `SwiftSpeechRecognizer` Using **Swift Concurrency** with `async` `await`, a couple of `AsyncStream`
+* `SwiftSpeechRecognizerDependency` A wrapper around the library above facilitating the integration with [Point-Free Dependencies](https://github.com/pointfreeco/swift-dependencies) library or a project made with The Composable Architecture (TCA).
+* `SwiftSpeechCombine` the OG library still available in this package
+
+## Modern concurrency usage
+
+TODO
+
+## Point-Free Depdency usage
+
+TODO
+
+## Combine usage
 
 You can instantiate/inject `SpeechRecognitionEngine` object, it has this behavior
 
@@ -22,7 +34,7 @@ You can instantiate/inject `SpeechRecognitionEngine` object, it has this behavio
 * `var isRecognitionAvailablePublisher`: subscribe to this to know when the Speech Recognition is available on the device (like if the internet connection allows the Speech Recognition to be processed)
 * `var newUtterancePublisher`: subscribe to this if you're only interested in "new" actual utterance. It's actually a shortcut of `recognizedUtterancePublisher` while it removes duplicates and only take an actual String (so it's never `nil`)
 
-Example
+### Example
 
 ```swift
 import Combine
