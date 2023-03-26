@@ -24,6 +24,6 @@ let package = Package(
 //            ]
 //        ),
         .testTarget(name: "SwiftSpeechRecognizerTests", dependencies: ["SwiftSpeechRecognizer"]),
-        .target(name: "SwiftSpeechCombine", dependencies: []),
+        .target(name: "SwiftSpeechCombine", dependencies: ["SwiftSpeechRecognizer"]),
     ]
 )

@@ -1,5 +1,6 @@
 import Combine
 import Speech
+import SwiftSpeechRecognizer
 
 public protocol SpeechRecognitionEngine {
     /// Publish every change about the authorization status of the Speech Recognition including microphone usage
@@ -166,16 +167,4 @@ public extension SpeechRecognitionSpeechEngine {
             .compactMap({ $0 })
             .eraseToAnyPublisher()
     }
-}
-
-public enum SpeechRecognitionStatus {
-    case notStarted
-    case recording
-    case stopping
-    case stopped
-}
-
-public enum SpeechRecognitionEngineError: Error {
-    case speechAudioBufferRecognitionRequestInitFailed
-    case speechRecognizerInitFailed
 }
