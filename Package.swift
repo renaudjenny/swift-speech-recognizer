@@ -8,7 +8,7 @@ let package = Package(
     platforms: [.iOS(.v15)],
     products: [
         .library(name: "SwiftSpeechRecognizer",targets: ["SwiftSpeechRecognizer"]),
-//        .library(name: "SwiftSpeechRecognizerDependency",targets: ["SwiftSpeechRecognizerDependency"]),
+        .library(name: "SwiftSpeechRecognizerDependency",targets: ["SwiftSpeechRecognizerDependency"]),
         .library(name: "SwiftSpeechCombine",targets: ["SwiftSpeechCombine"]),
     ],
     dependencies: [
@@ -16,13 +16,13 @@ let package = Package(
     ],
     targets: [
         .target(name: "SwiftSpeechRecognizer", dependencies: []),
-//        .target(
-//            name: "SwiftSpeechRecognizerDependency",
-//            dependencies: [
-//                .product(name: "Dependencies", package: "swift-dependencies"),
-//                "SwiftSpeechRecognizer",
-//            ]
-//        ),
+        .target(
+            name: "SwiftSpeechRecognizerDependency",
+            dependencies: [
+                .product(name: "Dependencies", package: "swift-dependencies"),
+                "SwiftSpeechRecognizer",
+            ]
+        ),
         .testTarget(name: "SwiftSpeechRecognizerTests", dependencies: ["SwiftSpeechRecognizer"]),
         .target(name: "SwiftSpeechCombine", dependencies: ["SwiftSpeechRecognizer"]),
     ]

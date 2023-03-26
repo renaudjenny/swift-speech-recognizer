@@ -66,15 +66,13 @@ private final class SpeechRecognitionSpeechEngine: NSObject, ObservableObject, S
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
 
-    public func requestAuthorization() {
-        SFSpeechRecognizer.requestAuthorization { [weak self] authorizationStatus in
-            DispatchQueue.main.async { [weak self] in
-                self?.authorizationStatus(authorizationStatus)
-            }
+    func requestAuthorization() {
+        SFSpeechRecognizer.requestAuthorization { @MainActor [weak self] authorizationStatus in
+            self?.authorizationStatus(authorizationStatus)
         }
     }
 
-    public func startRecording() throws {
+    func startRecording() throws {
         guard !audioEngine.isRunning
         else { return stopRecording() }
 
@@ -92,9 +90,7 @@ private final class SpeechRecognitionSpeechEngine: NSObject, ObservableObject, S
         // Create and configure the speech recognition request.
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         guard let recognitionRequest = recognitionRequest
-        else {
-            throw SpeechRecognitionEngineError.speechAudioBufferRecognitionRequestInitFailed
-        }
+        else { throw SpeechRecognitionEngineError.speechAudioBufferRecognitionRequestInitFailed }
         recognitionRequest.shouldReportPartialResults = true
         // Make some test, we could probably keep all speech recognition data on the devices
         // recognitionRequest.requiresOnDeviceRecognition = true
@@ -104,29 +100,27 @@ private final class SpeechRecognitionSpeechEngine: NSObject, ObservableObject, S
 
         // Create a recognition task for the speech recognition session.
         // Keep a reference to the task so that it can be canceled.
-        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) {
+            @MainActor [weak self] result, error in
+            guard let self = self else { return }
 
-                var isFinal = false
+            var isFinal = false
 
-                if let result = result {
-                    // Update the text view with the results
-                    self.recognizedUtterance(result.bestTranscription.formattedString)
-                    isFinal = result.isFinal
-                    print("Text \(result.bestTranscription.formattedString)")
-                }
+            if let result = result {
+                // Update the text view with the results
+                self.recognizedUtterance(result.bestTranscription.formattedString)
+                isFinal = result.isFinal
+            }
 
-                if error != nil || isFinal {
-                    // Stop recognizing speech if there is a problem.
-                    self.audioEngine.stop()
-                    inputNode.removeTap(onBus: 0)
+            if error != nil || isFinal {
+                // Stop recognizing speech if there is a problem.
+                self.audioEngine.stop()
+                inputNode.removeTap(onBus: 0)
 
-                    self.recognitionRequest = nil
-                    self.recognitionTask = nil
+                self.recognitionRequest = nil
+                self.recognitionTask = nil
 
-                    self.recognitionStatus(.stopped)
-                }
+                self.recognitionStatus(.stopped)
             }
         }
 
@@ -141,7 +135,7 @@ private final class SpeechRecognitionSpeechEngine: NSObject, ObservableObject, S
         recognitionStatus(.recording)
     }
 
-    public func stopRecording() {
+    func stopRecording() {
         if audioEngine.isRunning {
             audioEngine.stop()
             recognitionRequest?.endAudio()
@@ -149,6 +143,10 @@ private final class SpeechRecognitionSpeechEngine: NSObject, ObservableObject, S
         } else {
             recognitionStatus(.stopped)
         }
+    }
+
+    func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
+        isRecognitionAvailable(available)
     }
 }
 
