@@ -5,11 +5,11 @@ import PackageDescription
 
 let package = Package(
     name: "swift-speech-recognizer",
-    platforms: [.iOS(.v15)],
+    platforms: [.iOS(.v15), .macOS(.v13)],
     products: [
-        .library(name: "SwiftSpeechRecognizer",targets: ["SwiftSpeechRecognizer"]),
-        .library(name: "SwiftSpeechRecognizerDependency",targets: ["SwiftSpeechRecognizerDependency"]),
-        .library(name: "SwiftSpeechCombine",targets: ["SwiftSpeechCombine"]),
+        .library(name: "SwiftSpeechRecognizer", targets: ["SwiftSpeechRecognizer"]),
+        .library(name: "SwiftSpeechRecognizerDependency", targets: ["SwiftSpeechRecognizerDependency"]),
+        .library(name: "SwiftSpeechCombine", targets: ["SwiftSpeechCombine"]),
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "0.2.0"),

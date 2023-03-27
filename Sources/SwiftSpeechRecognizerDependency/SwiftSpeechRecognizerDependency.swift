@@ -94,3 +94,16 @@ extension SwiftSpeechRecognizer {
         )
     }()
 }
+
+private enum SwiftSpeechRecognizerDependencyKey: DependencyKey {
+    static let liveValue = SwiftSpeechRecognizer.live
+    static let testValue = SwiftSpeechRecognizer.test
+    static let previewValue = SwiftSpeechRecognizer.preview
+}
+
+public extension DependencyValues {
+    var speechRecognizer: SwiftSpeechRecognizer {
+        get { self[SwiftSpeechRecognizerDependencyKey.self] }
+        set { self[SwiftSpeechRecognizerDependencyKey.self] = newValue }
+    }
+}

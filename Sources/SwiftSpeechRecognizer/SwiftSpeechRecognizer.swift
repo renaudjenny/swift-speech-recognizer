@@ -151,7 +151,7 @@ private final class SpeechRecognitionSpeechEngine: NSObject, ObservableObject, S
 }
 
 public extension SwiftSpeechRecognizer {
-    var live: Self {
+    static var live: Self {
         let engine = SpeechRecognitionSpeechEngine()
         let authorizationStatus = AsyncStream { continuation in
             engine.authorizationStatus = { continuation.yield($0) }
