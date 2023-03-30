@@ -4,7 +4,7 @@
 
 import Dependencies
 import Speech
-import SwiftSpeechRecognizer
+@_exported import SwiftSpeechRecognizer
 import XCTestDynamicOverlay
 
 extension SwiftSpeechRecognizer {
