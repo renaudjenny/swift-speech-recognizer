@@ -41,7 +41,7 @@ public struct SwiftSpeechRecognizer {
         isRecognitionAvailable: @escaping () -> AsyncStream<Bool>,
         newUtterance: @escaping () -> AsyncStream<String>,
         requestAuthorization: @escaping () -> Void,
-        startRecording: @escaping () -> Void,
+        startRecording: @escaping () throws -> Void,
         stopRecording: @escaping () -> Void
     ) {
         self.authorizationStatus = authorizationStatus
@@ -186,7 +186,7 @@ public extension SwiftSpeechRecognizer {
             isRecognitionAvailable: { isRecognitionAvailable },
             newUtterance: { newUtterance },
             requestAuthorization: { engine.requestAuthorization() },
-            startRecording: { engine.stopRecording() },
+            startRecording: { try engine.startRecording() },
             stopRecording: { engine.stopRecording() }
         )
     }
