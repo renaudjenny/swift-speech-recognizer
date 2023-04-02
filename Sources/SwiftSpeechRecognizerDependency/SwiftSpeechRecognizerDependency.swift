@@ -49,11 +49,15 @@ extension SwiftSpeechRecognizer {
             startRecordingCallbacks.append {
                 continuation.yield(nil)
                 recordingTask = Task {
-                    var utterance: String? = ""
+                    var utterance: String?
                     for word in ["this", "is", "a", "preview", "speech", "recognition"] {
                         guard !Task.isCancelled else { return }
-                        try await Task.sleep(nanoseconds: UInt64(100_000_000 * word.count))
-                        utterance = (utterance ?? "") + word
+                        try await Task.sleep(nanoseconds: UInt64(50_000_000 * word.count))
+                        if let existingUtterance = utterance {
+                            utterance = "\(existingUtterance) \(word)"
+                        } else {
+                            utterance = word
+                        }
                         continuation.yield(utterance)
                     }
                 }
@@ -111,3 +115,97 @@ public extension DependencyValues {
         set { self[SwiftSpeechRecognizerDependencyKey.self] = newValue }
     }
 }
+
+#if DEBUG
+import SwiftUI
+
+struct SwiftSpeechDependencyPreviews: PreviewProvider {
+    static var previews: some View {
+        Preview()
+    }
+
+    private struct Preview: View {
+        @StateObject var model = SpeechRecognizerModel()
+
+        var body: some View {
+            VStack {
+                Button {
+                    if [.notStarted, .stopped].contains(model.recognitionStatus) {
+                        model.startRecording()
+                    } else {
+                        model.stopRecording()
+                    }
+                } label: {
+                    if [.notStarted, .stopped].contains(model.recognitionStatus) {
+                        Text("Start recording").multilineTextAlignment(.center)
+                    } else if model.recognitionStatus == .stopping {
+                        Text("Stopping")
+                    } else {
+                        Text("Stop recording")
+                    }
+                }
+                .disabled(model.recognitionStatus == .stopping)
+                .padding()
+
+                Text("Recognized utterance: \(model.newUtterance)")
+                Text("Authorization Status: \(model.authorizationStatus.description)")
+                Text("Speech Recognizer Status: \(model.recognitionStatus.description)")
+            }
+        }
+    }
+
+    private final class SpeechRecognizerModel: ObservableObject {
+        @Dependency(\.speechRecognizer) var speechRecognizer
+
+        @Published var authorizationStatus: SFSpeechRecognizerAuthorizationStatus = .notDetermined
+        @Published var recognitionStatus: SpeechRecognitionStatus = .notStarted
+        @Published var newUtterance: String = ""
+
+        func startRecording() {
+            Task {
+                for await authorizationStatus in speechRecognizer.authorizationStatus() {
+                    self.authorizationStatus = authorizationStatus
+
+                    if authorizationStatus == .authorized {
+                        try! speechRecognizer.startRecording()
+                    }
+                }
+            }
+
+            Task {
+                for await recognitionStatus in speechRecognizer.recognitionStatus() {
+                    self.recognitionStatus = recognitionStatus
+                }
+            }
+
+            Task {
+                for await newUtterance in speechRecognizer.newUtterance() {
+                    self.newUtterance = newUtterance
+                }
+            }
+
+            if authorizationStatus != .authorized {
+                speechRecognizer.requestAuthorization()
+            } else {
+                try! speechRecognizer.startRecording()
+            }
+        }
+
+        func stopRecording() {
+            speechRecognizer.stopRecording()
+        }
+    }
+}
+
+extension SFSpeechRecognizerAuthorizationStatus: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .notDetermined: return "not determined"
+        case .denied: return "denied"
+        case .restricted: return "restricted"
+        case .authorized: return "authorized"
+        @unknown default: return "unknown!"
+        }
+    }
+}
+#endif
