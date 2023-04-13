@@ -1,6 +1,6 @@
 import Foundation
 
-public enum SpeechRecognitionStatus {
+public enum SpeechRecognitionStatus: Equatable {
     case notStarted
     case recording
     case stopping
