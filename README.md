@@ -6,9 +6,84 @@ This package contains some very straightforward wrappers around around Speech Re
 * `SwiftSpeechRecognizerDependency` A wrapper around the library above facilitating the integration with [Point-Free Dependencies](https://github.com/pointfreeco/swift-dependencies) library or a project made with The Composable Architecture (TCA).
 * `SwiftSpeechCombine` the OG library still available in this package
 
+## Authorization
+
+⚠️ For Speech Recognition to be allowed to work, you must add `NSSpeechRecognitionUsageDescription` in your app Info.plist with a description of its usage. 
+
 ## Modern concurrency usage
 
-TODO
+```swift
+import Speech
+import SwiftSpeechRecognizer
+
+struct SpeechRecognizer {
+
+    var authorizationStatusChanged: (SFSpeechRecognizerAuthorizationStatus) -> Void
+    var speechRecognitionStatusChanged: (SpeechRecognitionStatus) -> Void
+    var utteranceChanged: (String) -> Void
+
+    private let speechRecognizer = SwiftSpeechRecognizer.live
+
+    func start() {
+        speechRecognizer.requestAuthorization()
+        Task {
+            for await authorizationStatus in speechRecognizer.authorizationStatus() {
+                authorizationStatusChanged(authorizationStatus)
+
+                switch authorizationStatus {
+                case .authorized:
+                    startRecording()
+                default:
+                    print("Not authorized to use speech recognizer")
+                }
+            }
+        }
+    }
+
+    private func startRecording() {
+        do {
+            try speechRecognizer.startRecording()
+            Task {
+                for await recognitionStatus in speechRecognizer.recognitionStatus() {
+                    speechRecognitionStatusChanged(recognitionStatus)
+                }
+            }
+
+            Task {
+                for await newUtterance in speechRecognizer.newUtterance() {
+                    utteranceChanged(newUtterance)
+                }
+            }
+        } catch {
+            print("Something went wrong: \(error)")
+            speechRecognizer.stopRecording()
+        }
+    }
+}
+
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        Button {
+            let speechRecognizer = SpeechRecognizer(
+                authorizationStatusChanged: { newAuthorizationStatus in
+                    print("Authorization status changed: \(newAuthorizationStatus)")
+                },
+                speechRecognitionStatusChanged: { newRecognitionStatus in
+                    print("Recognition status changed: \(newRecognitionStatus)")
+                },
+                utteranceChanged: { newUtterance in
+                    print("Recognized utterance changed: \(newUtterance)")
+                }
+            )
+            speechRecognizer.start()
+        } label: {
+            Text("Start speech recognizer")
+        }
+    }
+}
+```
 
 ## Point-Free Dependency usage
 
@@ -223,7 +298,8 @@ engine.authorizationStatusPublisher
 You can add SwiftSpeechCombine to an Xcode project by adding it as a package dependency.
 
 1. From the **File** menu, select **Swift Packages › Add Package Dependency...**
-2. Enter "https://github.com/renaudjenny/SwiftSpeechCombine" into the package repository URL test field
+2. Enter "https://github.com/renaudjenny/swift-speech-recognizer" into the package repository URL test field
+3. Select one of the three libary that you are interested in. See [above](#swiftspeechrecognizer)
 
 ### As package dependency
 
@@ -233,13 +309,17 @@ Edit your `Package.swift` to add this library.
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/renaudjenny/SwiftSpeechCombine", from: "0.0.1"),
+        .package(url: "https://github.com/renaudjenny/SwiftSpeechCombine", from: "1.0.0"),
         ...
     ],
     targets: [
         .target(
             name: "<Your project name>",
-            dependencies: ["SwiftSpeechCombine"]),
+            dependencies: [
+                .product(name: "SwiftSpeechRecognizer", package: "swift-speech-recognizer"), // <-- Modern concurrency
+                .product(name: "SwiftSpeechRecognizerDependency", package: "swift-speech-recognizer"), // <-- Point-Free Dependencies library wrapper
+                .product(name: "SwiftSpeechCombine", package: "swift-speech-recognizer"), // <-- Combine wrapper
+            ]),
         ...
     ]
 )
