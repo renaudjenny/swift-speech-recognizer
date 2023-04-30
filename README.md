@@ -1,5 +1,9 @@
 # SwiftSpeechRecognizer
 
+[![Swift Test](https://github.com/renaudjenny/swift-speech-recognizer/actions/workflows/test.yml/badge.svg)](https://github.com/renaudjenny/swift-speech-recognizer/actions/workflows/test.yml)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Frenaudjenny%2Fswift-speech-recognizer%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/renaudjenny/swift-speech-recognizer)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Frenaudjenny%2Fswift-speech-recognizer%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/renaudjenny/swift-speech-recognizer)
+
 This package contains some very straightforward wrappers around around Speech Recognition part of SFSpeechRecognizer to allow you using this with ease.
 
 * `SwiftSpeechRecognizer` Using **Swift Concurrency** with `async` `await`, a couple of `AsyncStream`
